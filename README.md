@@ -4,14 +4,14 @@ A simple and lightweight time-ordered random ID library designed for human-scale
 
 ## What is smolUID?
 
-smolUID is a simple, lightweight library for generating unique, time-ordered, human-readable IDs. Unlike full UUIDs, more complex enterprise-grade time-orderd IDs, or simple auto-incrementing database IDs, UIDs are:
+smolUID is a simple, lightweight library for generating unique, time-ordered, human-readable IDs. Unlike full UUIDs, more complex enterprise-grade time-ordered IDs, or simple auto-incrementing database IDs, UIDs are:
 
 - **Human-readable**: String representations as base 36 integers for more compact (10-13 characters) format for URLs, markup, etc.
 - **Time-ordered**: Can be represented as integers or strings, and both are naturally sortable by rough creation time
 - **URL-safe**: No special characters that are hard to type or need encoding in URLs
 - **Privacy-conscious**: Can drop optional amounts of timestamp precision to avoid leaking exact creation times
 - **Ergonomic**: Strings can be easily converted from the concise format back into the underlying integer, or vice versa
-- **Future-proof**: Currently underlying integer values are 63 bits, so they fit in a signed 64-bit integer
+- **Future-proof**: Currently underlying integer values are 63 bits, so they fit in a signed 64-bit integer, but future versions could expand
 
 ## Why smolUID?
 
@@ -114,7 +114,7 @@ $uid = UID::generate();
 $version = $uid->version();
 
 // Get the approximate timestamp when this UID was created
-// This returns the lower bound of when this UID was created
+// This returns the lower bound of when this UID could have been created
 $timestamp = $uid->time();
 
 // Get the random bits of the UID
@@ -135,7 +135,7 @@ $db->query("INSERT INTO users (id, name) VALUES (?, ?)", [$uid->value, "John"]);
 
 ### Deterministic generation
 
-UIDs can also be generated deterministically, if you need to use them in a manner similar to a hash. In this case they are produced as version 0 UIDs with no time data, and their random data is produced by truncating a sha256 hmac or simple hash of the provided string.
+UIDs can also be generated deterministically if you want to use them in a manner similar to a hash. In this case they are produced as version 0 UIDs with no time data, and their random data is produced by truncating a sha256 hmac or simple hash of the provided string.
 
 ```php
 use Joby\Smol\UID\UID;
@@ -153,7 +153,7 @@ $uid = UID::hmacGenerate('some value to generate from', 'secret key');
 
 In long-running scripts that work with large numbers of different UIDs in a single run (think at least hundreds of thousands, if not millions), you may want to garbage-collect the internal cache periodically. This will clear out weak cache references to objects that have been garbage-collected by PHP.
 
-Running garbage collection is as simple as calling `UID::garbageCollect()`
+Running garbage collection just takes running `UID::garbageCollect()`
 
 ## How It Works
 
@@ -165,8 +165,10 @@ Each UID consists of a single integer value with three parts:
 
 The combination is encoded in base-36 (alphanumeric) when a string representation is required, but can also be stored as an integer. All current versions are at most 63 bits long, allowing them to fit in a normal 64-bit signed integer. This means you can work with their underlying values easily and efficiently in almost any environment, with no special handling.
 
+Future versions may expand to larger bit sizes, but for now the goal is to fit in a single signed integer for maximum compatibility and simplicity.
+
 ## Limitations
 
 - Not designed or suitable for distributed systems requiring guaranteed global uniqueness
-- Time ordering is varying levels of approximate due to the dropped precision bits
+- Time ordering may be varying levels of approximate due to the dropped precision bits
 - No built-in collision detection (though collisions are extremely unlikely at human scale applications)
