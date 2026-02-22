@@ -188,7 +188,56 @@ class UIDTest extends TestCase
         $ref = new \ReflectionClass(UID::class);
         $cache = $ref->getStaticPropertyValue('cache');
 
-        $this->assertArrayHasKey(77777, $cache, 'Active UID must not be removed from cache.');
-        $this->assertSame($uid, $cache[77777]->get(), 'Cached reference must still point to the active object.');
+        $this->assertArrayHasKey((UID::class) . ':77777', $cache, 'Active UID must not be removed from cache.');
+        $this->assertSame($uid, $cache[(UID::class) . ':77777']->get(), 'Cached reference must still point to the active object.');
+    }
+
+    /**
+     * Verify that static factory methods return instances of the calling class
+     * when UID is extended (late static binding).
+     */
+    public function test_subclass_generate_returns_child_class()
+    {
+        $uid = TypedUID::generate(UID::VERSION_1_0);
+        $this->assertInstanceOf(TypedUID::class, $uid);
+    }
+
+    public function test_subclass_from_int_returns_child_class()
+    {
+        $uid = TypedUID::fromInt(1234567890);
+        $this->assertInstanceOf(TypedUID::class, $uid);
+    }
+
+    public function test_subclass_from_string_returns_child_class()
+    {
+        $str = (string) TypedUID::fromInt(1234567890);
+        $uid = TypedUID::fromString($str);
+        $this->assertInstanceOf(TypedUID::class, $uid);
+    }
+
+    public function test_subclass_hash_generate_returns_child_class()
+    {
+        $uid = TypedUID::hashGenerate('foo');
+        $this->assertInstanceOf(TypedUID::class, $uid);
+    }
+
+    public function test_subclass_hmac_generate_returns_child_class()
+    {
+        $uid = TypedUID::hmacGenerate('foo', 'bar');
+        $this->assertInstanceOf(TypedUID::class, $uid);
+    }
+
+    /**
+     * Identity map must be per-class — a TypedUID and a UID with the same
+     * integer value are different things and must not alias each other.
+     */
+    public function test_subclass_identity_map_is_isolated_from_parent()
+    {
+        $parent = UID::fromInt(1234567890);
+        $child = TypedUID::fromInt(1234567890);
+
+        $this->assertInstanceOf(UID::class, $parent);
+        $this->assertInstanceOf(TypedUID::class, $child);
+        $this->assertNotSame($parent, $child);
     }
 }

@@ -15,11 +15,13 @@ use WeakReference;
 
 /**
  * Lightweight time-ordered ID class that is an integer under the hood but is stringable for more human-readable output. String representations will be 10 characters long for years to come, but will grow as the ID integers increase in size. The IDs are sortable by generation time, in both integer and string forms, and the resolution of that sorting is adjustable by picking versions that trim different numbers of bits from the timestamp in favor of more random bits.
+ * 
+ * @phpstan-consistent-constructor
  */
 class UID implements Stringable, JsonSerializable
 {
 
-    /** @var array<int,WeakReference<UID>> $cache cache of weak references */
+    /** @var array<string,WeakReference<static>> $cache cache of weak references */
     protected static array $cache = [];
 
     /**
@@ -74,7 +76,7 @@ class UID implements Stringable, JsonSerializable
      * 
      * @throws InvalidArgumentException if the string is not a valid UID.
      */
-    public static function fromString(string $uid): UID
+    public static function fromString(string $uid): static
     {
         $int = base_convert(strtolower($uid), 36, 10);
         return static::fromInt(intval($int));
@@ -85,18 +87,19 @@ class UID implements Stringable, JsonSerializable
      * 
      * @throws InvalidArgumentException if the integer is negative.
      */
-    public static function fromInt(int $uid): UID
+    public static function fromInt(int $uid): static
     {
         // check for existing object in weak map
-        if (isset(static::$cache[$uid])) {
-            $object = static::$cache[$uid]->get();
+        $cache_id = static::class . ':' . $uid;
+        if (array_key_exists($cache_id, static::$cache)) {
+            $object = static::$cache[$cache_id]->get();
             if ($object !== null) {
                 return $object;
             }
         }
         // create new object and store weak reference
-        $object = new UID($uid);
-        static::$cache[$uid] = WeakReference::create($object);
+        $object = new static($uid);
+        static::$cache[$cache_id] = WeakReference::create($object);
         return $object;
     }
 
@@ -114,14 +117,14 @@ class UID implements Stringable, JsonSerializable
      * 
      * @throws InvalidArgumentException if the version is unsupported.
      */
-    public static function generate(int $version = self::VERSION_0): UID
+    public static function generate(int $version = self::VERSION_0): static
     {
         // special case for fully-random ones
         if ($version == self::VERSION_0) {
             $int = random_int(0, (1 << 58) - 1) << 4;
             $int = $int | self::VERSION_0;
             $int = $int | (1 << 62);
-            return UID::fromInt($int);
+            return static::fromInt($int);
         }
         // normal generation
         if (!array_key_exists($version, self::VERSION_CONFIGS)) {
@@ -139,13 +142,13 @@ class UID implements Stringable, JsonSerializable
         $int = $int << 4;
         $int = $int | $version;
         // return finished UID
-        return UID::fromInt($int);
+        return static::fromInt($int);
     }
 
     /**
      * Generate a UID deterministically from a source string and secret, using HMAC to produce a pseudo-random but deterministic value.
      */
-    public static function hmacGenerate(string $source, string $secret): UID
+    public static function hmacGenerate(string $source, string $secret): static
     {
         // hmac to get a deterministic but unpredictable hash and truncate to 64 bits
         $hash = hash_hmac('sha256', $source, $secret);
@@ -157,13 +160,13 @@ class UID implements Stringable, JsonSerializable
         // make 63rd bit 1
         $int = $int | 1 << 62;
         // return finished UID
-        return UID::fromInt($int);
+        return static::fromInt($int);
     }
 
     /**
      * Generate a UID deterministically from a source string, using a hash to produce a pseudo-random but deterministic value. Useful when you need deterministic UIDs but the security of a full HMAC hash is not required.
      */
-    public static function hashGenerate(string $source): UID
+    public static function hashGenerate(string $source): static
     {
         // hmac to get a deterministic but unpredictable hash and truncate to 64 bits
         $hash = hash('sha256', $source);
@@ -175,7 +178,7 @@ class UID implements Stringable, JsonSerializable
         // make 63rd bit 1
         $int = $int | 1 << 62;
         // return finished UID
-        return UID::fromInt($int);
+        return static::fromInt($int);
     }
 
     /**
