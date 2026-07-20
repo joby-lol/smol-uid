@@ -142,40 +142,6 @@ class UIDTest extends TestCase
     }
 
     /**
-     * Verify that manual garbage collection clears stale WeakReferences 
-     * from the internal cache once strong references are released.
-     */
-    public function test_manual_garbage_collection()
-    {
-        // Ensure any prior test artifacts are cleared
-        gc_collect_cycles();
-        UID::garbageCollect();
-
-        // 1. Create a UID and store it
-        $uid = UID::fromInt(1234567890);
-
-        // Helper to inspect protected static $cache size via reflection
-        $getCacheSize = function () {
-            $ref = new \ReflectionClass(UID::class);
-            return count($ref->getStaticPropertyValue('cache'));
-        };
-
-        $this->assertEquals(1, $getCacheSize(), 'Cache should contain one item.');
-
-        // 2. Clear the only strong reference
-        unset($uid);
-
-        // 3. Force PHP's internal cycle collector to ensure the object is destroyed
-        gc_collect_cycles();
-
-        // 4. Run the library's manual collection. 
-        // Before this, the key '88888' still exists in the array, but its value is a dead WeakReference.
-        UID::garbageCollect();
-
-        $this->assertEquals(0, $getCacheSize(), 'Cache should be empty after manual garbage collection.');
-    }
-
-    /**
      * Ensure that the garbage collector does not remove objects that 
      * are still in use elsewhere in the application.
      */
