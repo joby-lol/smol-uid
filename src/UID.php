@@ -11,6 +11,7 @@ namespace Joby\Smol\UID;
 use InvalidArgumentException;
 use JsonSerializable;
 use Stringable;
+use Throwable;
 use WeakReference;
 
 /**
@@ -72,6 +73,19 @@ class UID implements Stringable, JsonSerializable
     public readonly int $value;
 
     /**
+     * Attempt to create a UID object from its string representation, returning null if it is invalid.
+     */
+    public static function tryFromString(string $uid): static|null
+    {
+        try {
+            return static::fromString($uid);
+        }
+        catch (Throwable $th) {
+            return null;
+        }
+    }
+
+    /**
      * Create a UID object from its string representation.
      * 
      * @throws InvalidArgumentException if the string is not a valid UID.
@@ -80,6 +94,19 @@ class UID implements Stringable, JsonSerializable
     {
         $int = base_convert(strtolower($uid), 36, 10);
         return static::fromInt(intval($int));
+    }
+
+    /**
+     * Attempt to create a UID object from its integer representation, returning null if it is invalid.
+     */
+    public static function tryFromInt(int $int): static|null
+    {
+        try {
+            return static::fromInt($int);
+        }
+        catch (Throwable $th) {
+            return null;
+        }
     }
 
     /**
