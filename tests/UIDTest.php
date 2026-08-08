@@ -13,6 +13,7 @@ use PHPUnit\Framework\TestCase;
 
 class UIDTest extends TestCase
 {
+
     public function test_version_0()
     {
         $uid = UID::generate(UID::VERSION_0);
@@ -84,7 +85,7 @@ class UIDTest extends TestCase
         $uid = UID::hmacGenerate('foo', 'bar');
         $this->assertEquals(UID::VERSION_0, $uid->version());
         $this->assertEquals(4980502661450870528, $uid->value);
-        $this->assertEquals('11u80ugb7uj28', (string)$uid);
+        $this->assertEquals('11u80ugb7uj28', (string) $uid);
     }
 
     public function test_hash_generation()
@@ -103,6 +104,7 @@ class UIDTest extends TestCase
 
     public function test_invalid_version_from_integer()
     {
+        $this->assertNull(UID::tryFromInt(15));
         // NOTE: if versions all the way through 15 are supported in the future, this test will need to be updated/removed
         $this->expectException(InvalidArgumentException::class);
         UID::fromInt(15);
@@ -117,7 +119,7 @@ class UIDTest extends TestCase
     public function test_json_serialization()
     {
         $uid = UID::generate(UID::VERSION_1_0);
-        $this->assertEquals('"' . (string)$uid . '"', json_encode($uid));
+        $this->assertEquals('"' . (string) $uid . '"', json_encode($uid));
     }
 
     /**
@@ -206,4 +208,5 @@ class UIDTest extends TestCase
         $this->assertInstanceOf(TypedUID::class, $child);
         $this->assertNotSame($parent, $child);
     }
+
 }
