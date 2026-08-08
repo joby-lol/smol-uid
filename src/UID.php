@@ -30,27 +30,27 @@ class UID implements Stringable, JsonSerializable
     public const VERSION_0 = 0;
 
     /**
-     * Version 1.1, with full second resolution timestamp and 11 random bits.
+     * Version 1.0, with full second resolution timestamp and 14 random bits.
      */
     public const VERSION_1_0 = 1;
 
     /**
-     * Version 1.2, trims 8 bits for a resolution of about 4.25 minutes, with 19 random bits.
+     * Version 1.1, trims 8 bits for a resolution of about 4.25 minutes, with 22 random bits.
      */
     public const VERSION_1_1 = 2;
 
     /**
-     * Version 1.3, trims 16 bits for a resolution of about 18 hours, with 27 random bits.
+     * Version 1.2, trims 16 bits for a resolution of about 18 hours, with 30 random bits.
      */
     public const VERSION_1_2 = 3;
 
     /**
-     * Version 1.4, trims 18 bits for a resolution of about 3 days, with 29 random bits.
+     * Version 1.3, trims 18 bits for a resolution of about 3 days, with 32 random bits.
      */
     public const VERSION_1_3 = 4;
 
     /**
-     * Version 1.5, trims 20 bits for a resolution of about 12 days, with 31 random bits.
+     * Version 1.4, trims 20 bits for a resolution of about 12 days, with 34 random bits.
      */
     public const VERSION_1_4 = 5;
 
@@ -252,7 +252,7 @@ class UID implements Stringable, JsonSerializable
      */
     public function __toString(): string
     {
-        return base_convert((string)$this->value, 10, 36);
+        return base_convert((string) $this->value, 10, 36);
     }
 
     /**
@@ -262,4 +262,5 @@ class UID implements Stringable, JsonSerializable
     {
         return $this->__toString();
     }
+
 }

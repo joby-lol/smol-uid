@@ -47,11 +47,11 @@ $uid = UID::generate(UID::VERSION_1_1);
 | Version | Time resolution    | Random bits | String length | Availability     |
 | ------- | ------------------ | ----------- | ------------- | ---------------- |
 | 0       | N/A (no time data) | 58          | 13            | ~288 quadrillion |
-| 1.0     | 1 second           | 11          | 10            | ~1.4 billion/day |
-| 1.1     | ~4.25 minutes      | 19          | 10            | ~1.4 billion/day |
-| 1.2     | ~18 hours          | 27          | 10            | ~1.4 billion/day |
-| 1.3     | ~3 days            | 29          | 10            | ~1.4 billion/day |
-| 1.4     | ~12 days           | 31          | 10            | ~1.4 billion/day |
+| 1.0     | 1 second           | 14          | 10            | ~1.4 billion/day |
+| 1.1     | ~4.25 minutes      | 22          | 10            | ~1.4 billion/day |
+| 1.2     | ~18 hours          | 30          | 10            | ~1.4 billion/day |
+| 1.3     | ~3 days            | 32          | 10            | ~1.4 billion/day |
+| 1.4     | ~12 days           | 34          | 10            | ~1.4 billion/day |
 
 ### Getting the string representation
 
